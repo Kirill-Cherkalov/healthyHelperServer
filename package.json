@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "mongoose": "^5.3.15"
+  },
+  "name": "healthyHelperServer",
+  "version": "1.0.0",
+  "main": "app.js",
+  "repository": "https://github.com/Kirill-Cherkalov/healthyHelperServer.git",
+  "author": "Kirill Cherkalov <kirill.cherkalov@gmail.com>",
+  "license": "MIT"
+}
