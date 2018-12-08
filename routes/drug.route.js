@@ -8,6 +8,6 @@ const drug_controller = require('../controllers/drug.controller');
 // a simple test url to check that all of our files are communicating correctly.
 router.get('/test', drug_controller.test);
 
-router.post('/create', drug_controller.drug_create);
+router.get('/', drug_controller.drug_details);
 
 module.exports = router;
