@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let DrugSchema = new Schema({
+    _id: Schema.Types.ObjectId,
+    parent: { type: Schema.Types.ObjectId, ref: 'DrugList' },
     name: { type: String, default: "" },
     manufacturer: { type: String, default: "" },
     web: { type: String, default: "" },
@@ -15,20 +17,26 @@ let DrugSchema = new Schema({
       dosageAdministration: { type: String, default: "" },
       interactions: { type: String, default: "" },
     }
-});
-
-const DrugListSchema = new Schema({
-    name: { type: String, default: "" },
-    saleNaming: [DrugSchema]
-})
-
-const OverviewListShema = new Schema({
+  });
+  
+  const DrugListSchema = new Schema({
+      _id: Schema.Types.ObjectId,
+      name: { type: String, default: "" },
+      parent: { type: Schema.Types.ObjectId, ref: 'DrugsList' },
+      saleNaming: [{ type: Schema.Types.ObjectId, ref: 'Drug' }]
+  })
+  
+  const DrugsListSchema = new Schema({
+    _id: Schema.Types.ObjectId,
     name: { type: String, default: "" },
     iconName: { type: String, default: "" },
-    data: [DrugListSchema],
-})
-
-const OverviewList = mongoose.model('OverviewList', OverviewListShema);
+    data: [{ type: Schema.Types.ObjectId, ref: 'DrugList' }]
+  })
+  
+  var Drug = mongoose.model('Drug', DrugSchema);
+  var DrugList = mongoose.model('DrugList', DrugListSchema);
+  var DrugsList = mongoose.model('DrugsList', DrugsListSchema);
+  
 
 
 //Simple version, without validation or sanitation
@@ -36,9 +44,38 @@ exports.test = function (req, res) {
     res.send('Greetings from the Test controller!');
 };
 
-exports.drug_details = function(req, res) {
-        OverviewList.find({}, function (err, product) {
-            if (err) return console.log(err);
+exports.overview_page = function(req, res) {
+    DrugsList.find({}, 'name iconName', function (err, product) {
+            if (err) return next(err);
+
             res.send(product);
         })
+}
+
+exports.drugs_list_page = function(req, res, next) {
+    DrugList.find({}, 'name', function(err, product) {
+        if (err) return next(err);
+
+        res.send(product);
+    })
+}
+
+exports.drugs_details_page = function(req, res, next) {
+    console.log(req.params.drugGroup)
+    Drug
+      .find({ parent: req.params.drugGroup }, 'name')
+      .exec(function (err, drug) {
+        if (err) return console.log(err);
+        res.send(drug);
+      })
+}
+
+exports.drug_details_page = function(req, res, next) {
+  console.log(req.params.drugId)
+  Drug
+    .findById(req.params.drugId)
+    .exec(function (err, drug) {
+      if (err) return console.log(err);
+      res.send(drug);
+    })
 }
