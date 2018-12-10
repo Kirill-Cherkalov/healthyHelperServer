@@ -18,31 +18,24 @@ let DrugSchema = new Schema({
       interactions: { type: String, default: "" },
     }
   });
-  
+
   const DrugListSchema = new Schema({
       _id: Schema.Types.ObjectId,
       name: { type: String, default: "" },
       parent: { type: Schema.Types.ObjectId, ref: 'DrugsList' },
       saleNaming: [{ type: Schema.Types.ObjectId, ref: 'Drug' }]
   })
-  
+
   const DrugsListSchema = new Schema({
     _id: Schema.Types.ObjectId,
     name: { type: String, default: "" },
     iconName: { type: String, default: "" },
     data: [{ type: Schema.Types.ObjectId, ref: 'DrugList' }]
   })
-  
-  var Drug = mongoose.model('Drug', DrugSchema);
-  var DrugList = mongoose.model('DrugList', DrugListSchema);
-  var DrugsList = mongoose.model('DrugsList', DrugsListSchema);
-  
 
-
-//Simple version, without validation or sanitation
-exports.test = function (req, res) {
-    res.send('Greetings from the Test controller!');
-};
+const Drug = mongoose.model('Drug', DrugSchema);
+const DrugList = mongoose.model('DrugList', DrugListSchema);
+const DrugsList = mongoose.model('DrugsList', DrugsListSchema);
 
 exports.overview_page = function(req, res) {
     DrugsList.find({}, 'name iconName', function (err, product) {
@@ -61,7 +54,6 @@ exports.drugs_list_page = function(req, res, next) {
 }
 
 exports.drugs_details_page = function(req, res, next) {
-    console.log(req.params.drugGroup)
     Drug
       .find({ parent: req.params.drugGroup }, 'name')
       .exec(function (err, drug) {
@@ -71,11 +63,18 @@ exports.drugs_details_page = function(req, res, next) {
 }
 
 exports.drug_details_page = function(req, res, next) {
-  console.log(req.params.drugId)
   Drug
     .findById(req.params.drugId)
     .exec(function (err, drug) {
       if (err) return console.log(err);
       res.send(drug);
     })
+}
+
+exports.search_by_sub_string = function(req, res, next) {
+  Drug.find({ "name": { "$regex": req.body.queryString, "$options": "gim" } }, 'name instruction.interactions', function(err, response) {
+      if (err) return console.log(err);
+
+    res.send(response)
+  })
 }
